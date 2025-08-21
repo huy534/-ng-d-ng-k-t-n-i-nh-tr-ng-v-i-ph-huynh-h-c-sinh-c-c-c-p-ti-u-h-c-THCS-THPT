@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -13,6 +12,7 @@ import ReportsPage from './pages/ReportsPage';
 import BillingPage from './pages/BillingPage';
 import ProfilePage from './pages/ProfilePage';
 import SupportPage from './pages/SupportPage';
+import EditReportPage from './pages/EditReportPage'; // Import the new page
 import { UserRole } from './types';
 
 // Admin Pages
@@ -72,6 +72,7 @@ const AppRoutes: React.FC = () => {
                 {/* Teacher-specific routes */}
                 <Route element={<ProtectedRoute roles={[UserRole.TEACHER]} />}>
                     <Route path="/classes" element={<ClassesPage />} />
+                    <Route path="/class/:classId/student/:studentId/report" element={<EditReportPage />} />
                 </Route>
 
                 {/* Parent-specific routes */}

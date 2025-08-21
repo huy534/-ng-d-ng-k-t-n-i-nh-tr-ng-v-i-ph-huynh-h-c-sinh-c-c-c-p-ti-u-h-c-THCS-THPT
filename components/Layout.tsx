@@ -97,6 +97,22 @@ const Sidebar: React.FC<{ isOpen: boolean, setIsOpen: (isOpen: boolean) => void 
 
 const Header: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
     const { user } = useAuth();
+
+    const getRoleInfo = (role?: UserRole) => {
+        switch (role) {
+            case UserRole.ADMIN:
+                return { text: 'Quản trị viên', color: 'bg-purple-500 text-white' };
+            case UserRole.TEACHER:
+                return { text: 'Giáo viên', color: 'bg-green-500 text-white' };
+            case UserRole.PARENT:
+                return { text: 'Phụ huynh', color: 'bg-blue-500 text-white' };
+            default:
+                return { text: '', color: '' };
+        }
+    };
+
+    const roleInfo = getRoleInfo(user?.role);
+
     return (
         <header className="bg-white shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -105,7 +121,14 @@ const Header: React.FC<{ onMenuClick: () => void }> = ({ onMenuClick }) => {
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                     </button>
                     <div className="flex items-center ml-auto">
-                        <span className="text-gray-700 font-medium hidden sm:block">Xin chào, {user?.name}</span>
+                        <div className="text-right hidden sm:block">
+                            <p className="text-gray-700 font-medium">Xin chào, {user?.name}</p>
+                            {roleInfo.text && (
+                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${roleInfo.color}`}>
+                                    {roleInfo.text}
+                                </span>
+                            )}
+                        </div>
                         <img className="h-10 w-10 rounded-full ml-3" src={user?.avatarUrl} alt="User Avatar" />
                     </div>
                 </div>

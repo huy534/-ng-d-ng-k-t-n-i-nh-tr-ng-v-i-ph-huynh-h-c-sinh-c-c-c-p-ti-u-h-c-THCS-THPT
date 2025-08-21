@@ -1,8 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../services/mockApi';
 import { useAuth } from '../contexts/AuthContext';
 import { Classroom, Student } from '../types';
+import { PencilIcon } from '../components/icons';
 
 const ClassesPage: React.FC = () => {
   const { user } = useAuth();
@@ -13,7 +14,7 @@ const ClassesPage: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      api.getClassroomsByTeacher(user.id).then(data => {
+      api.getClassroomsByTeacher().then(data => {
         setClassrooms(data);
         if (data.length > 0) {
             handleSelectClass(data[0]);
@@ -75,8 +76,12 @@ const ClassesPage: React.FC = () => {
                                   </td>
                                   <td className="p-3 text-gray-800">{student.name}</td>
                                   <td className="p-3">
-                                      <button className="text-blue-500 hover:underline text-sm mr-2">Sửa</button>
-                                      <button className="text-red-500 hover:underline text-sm">Xóa</button>
+                                      <Link to={`/class/${selectedClass.id}/student/${student.id}/report`}
+                                        className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold hover:bg-blue-200"
+                                      >
+                                          <PencilIcon className="w-4 h-4 mr-1" />
+                                          Cập nhật học bạ
+                                      </Link>
                                   </td>
                               </tr>
                           ))}

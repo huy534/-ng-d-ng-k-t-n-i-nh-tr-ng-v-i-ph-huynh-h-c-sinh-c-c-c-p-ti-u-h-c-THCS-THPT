@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/mockApi';
 import { useAuth } from '../contexts/AuthContext';
@@ -13,7 +12,7 @@ const ReportsPage: React.FC = () => {
 
     useEffect(() => {
         if (user) {
-            api.getStudentsByParent(user.id).then(data => {
+            api.getStudentsByParent().then(data => {
                 setStudents(data);
                 if (data.length > 0) {
                     setSelectedStudent(data[0]);
@@ -75,7 +74,7 @@ const ReportsPage: React.FC = () => {
                                             {report.records.map(record => (
                                                 <tr key={record.subjectName} className="border-b border-gray-100 hover:bg-gray-50">
                                                     <td className="p-4 text-gray-800 font-medium">{record.subjectName}</td>
-                                                    <td className="p-4 text-gray-800">{record.averageScore.toFixed(2)}</td>
+                                                    <td className="p-4 text-gray-800">{record.averageScore > 0 ? record.averageScore.toFixed(2) : '-'}</td>
                                                     <td className="p-4 text-gray-800">{record.absences}</td>
                                                     <td className="p-4 text-gray-800">{record.conduct}</td>
                                                 </tr>

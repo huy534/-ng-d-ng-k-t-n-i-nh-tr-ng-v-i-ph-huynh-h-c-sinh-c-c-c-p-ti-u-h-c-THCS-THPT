@@ -13,7 +13,7 @@ const BillingPage: React.FC = () => {
 
     useEffect(() => {
         if (user) {
-            api.getStudentsByParent(user.id).then(data => {
+            api.getStudentsByParent().then(data => {
                 setStudents(data);
                 if (data.length > 0) {
                     setSelectedStudent(data[0]);
