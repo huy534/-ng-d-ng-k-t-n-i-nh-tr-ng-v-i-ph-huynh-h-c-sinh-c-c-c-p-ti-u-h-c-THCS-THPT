@@ -23,17 +23,24 @@ const EditReportPage: React.FC = () => {
                 const studentData = await api.getStudent(studentId);
                 setStudent(studentData);
                 const reportsData = await api.getReports(studentId);
-                // For simplicity, we edit the first report. A real app might have term selection.
+                
                 if (reportsData.length > 0) {
                     setReport(reportsData[0]);
                 } else {
-                    // Handle case where no report exists yet
+                    const subjects = await api.getAllSubjects();
+                    const initialRecords: AcademicRecord[] = subjects.map(subject => ({
+                        subjectName: subject.name,
+                        averageScore: 0,
+                        absences: 0,
+                        conduct: 'Đạt',
+                    }));
+
                     setReport({
                         id: `new_report_${studentId}`,
                         studentId: studentId,
                         term: 'Học kỳ 1',
                         year: new Date().getFullYear(),
-                        records: [],
+                        records: initialRecords,
                         teacherComments: '',
                     });
                 }
@@ -50,15 +57,12 @@ const EditReportPage: React.FC = () => {
     const handleRecordChange = (subjectName: string, field: keyof AcademicRecord, value: string | number) => {
         if (!report) return;
         
-        const updatedRecords = [...report.records];
-        const recordIndex = updatedRecords.findIndex(r => r.subjectName === subjectName);
-        
-        if (recordIndex > -1) {
-            (updatedRecords[recordIndex] as any)[field] = value;
-        } else {
-             // This part is simplified; a real app would fetch all subjects
-            updatedRecords.push({ subjectName, averageScore: 0, absences: 0, conduct: '', [field]: value });
-        }
+        const updatedRecords = report.records.map(r => {
+            if (r.subjectName === subjectName) {
+                return { ...r, [field]: value };
+            }
+            return r;
+        });
 
         setReport({ ...report, records: updatedRecords });
     };
@@ -75,12 +79,9 @@ const EditReportPage: React.FC = () => {
         setIsSaving(true);
         setSaveStatus('idle');
         try {
-            await api.updateReport(report.id, {
-                records: report.records,
-                teacherComments: report.teacherComments || ''
-            });
+            await api.updateReport(report);
             setSaveStatus('success');
-            setTimeout(() => navigate('/classes'), 2000); // Redirect after 2s
+            setTimeout(() => navigate('/classes'), 2000);
         } catch (error) {
             console.error("Failed to save report:", error);
             setSaveStatus('error');
@@ -131,7 +132,7 @@ const EditReportPage: React.FC = () => {
                                             min="0" 
                                             max="10" 
                                             value={record.averageScore}
-                                            onChange={(e) => handleRecordChange(record.subjectName, 'averageScore', parseFloat(e.target.value))}
+                                            onChange={(e) => handleRecordChange(record.subjectName, 'averageScore', parseFloat(e.target.value) || 0)}
                                             className="w-24 p-2 border rounded-md"
                                         />
                                     </td>
@@ -140,7 +141,7 @@ const EditReportPage: React.FC = () => {
                                             type="number" 
                                             min="0"
                                             value={record.absences}
-                                            onChange={(e) => handleRecordChange(record.subjectName, 'absences', parseInt(e.target.value, 10))}
+                                            onChange={(e) => handleRecordChange(record.subjectName, 'absences', parseInt(e.target.value, 10) || 0)}
                                             className="w-20 p-2 border rounded-md"
                                         />
                                     </td>

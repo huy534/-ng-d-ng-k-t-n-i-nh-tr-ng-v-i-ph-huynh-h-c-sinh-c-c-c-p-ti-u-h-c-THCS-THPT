@@ -12,7 +12,8 @@ import ReportsPage from './pages/ReportsPage';
 import BillingPage from './pages/BillingPage';
 import ProfilePage from './pages/ProfilePage';
 import SupportPage from './pages/SupportPage';
-import EditReportPage from './pages/EditReportPage'; // Import the new page
+import EditReportPage from './pages/EditReportPage';
+import TimetablePage from './pages/TimetablePage'; // Import the new page
 import { UserRole } from './types';
 
 // Admin Pages
@@ -62,6 +63,7 @@ const AppRoutes: React.FC = () => {
                     <Route path="/messages" element={<MessagesPage />} />
                     <Route path="/announcements" element={<AnnouncementsPage />} />
                     <Route path="/support" element={<SupportPage />} />
+                    <Route path="/timetable" element={<TimetablePage />} />
                 </Route>
                 
                 {/* Profile is accessible to all logged-in users */}

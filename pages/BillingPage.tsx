@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../services/mockApi';
 import { useAuth } from '../contexts/AuthContext';
 import { Student, Invoice } from '../types';
+import PaymentModal from './PaymentModal';
 
 const BillingPage: React.FC = () => {
     const { user } = useAuth();
@@ -10,6 +11,8 @@ const BillingPage: React.FC = () => {
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [loading, setLoading] = useState(true);
+    const [invoiceToPay, setInvoiceToPay] = useState<Invoice | null>(null);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -28,11 +31,20 @@ const BillingPage: React.FC = () => {
         if (selectedStudent) {
             setLoading(true);
             api.getInvoices(selectedStudent.id).then(data => {
-                setInvoices(data);
+                setInvoices(data.sort((a,b) => b.month - a.month));
                 setLoading(false);
             });
         }
     }, [selectedStudent]);
+
+    const handlePaymentSuccess = (updatedInvoice: Invoice) => {
+        setInvoices(prevInvoices => 
+            prevInvoices.map(inv => inv.id === updatedInvoice.id ? updatedInvoice : inv)
+        );
+        setInvoiceToPay(null);
+        setShowSuccessMessage(true);
+        setTimeout(() => setShowSuccessMessage(false), 3000); // Hide message after 3 seconds
+    };
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -42,6 +54,13 @@ const BillingPage: React.FC = () => {
         <div>
             <h2 className="text-3xl font-bold text-gray-800 mb-6">Thanh toán Học phí</h2>
 
+            {showSuccessMessage && (
+                <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-md" role="alert">
+                    <p className="font-bold">Thanh toán thành công!</p>
+                    <p>Cảm ơn bạn đã hoàn tất học phí.</p>
+                </div>
+            )}
+            
             {students.length > 1 && (
                 <div className="mb-4">
                     <label htmlFor="student-select" className="block text-sm font-medium text-gray-700">Chọn học sinh:</label>
@@ -96,7 +115,7 @@ const BillingPage: React.FC = () => {
                                     {!invoice.isPaid && (
                                         <div className="flex justify-end space-x-3 mt-4">
                                             <button className="px-5 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100">Xuất biên lai</button>
-                                            <button className="px-5 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">Thanh toán ngay</button>
+                                            <button onClick={() => setInvoiceToPay(invoice)} className="px-5 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">Thanh toán ngay</button>
                                         </div>
                                     )}
                                 </div>
@@ -106,6 +125,15 @@ const BillingPage: React.FC = () => {
                 ) : (
                     <p className="text-center text-gray-500 bg-white p-6 rounded-lg shadow-md">Không có hóa đơn nào cho học sinh này.</p>
                 )
+            )}
+
+            {invoiceToPay && selectedStudent && (
+                <PaymentModal 
+                    invoice={invoiceToPay}
+                    studentName={selectedStudent.name}
+                    onClose={() => setInvoiceToPay(null)}
+                    onSuccess={handlePaymentSuccess}
+                />
             )}
         </div>
     );

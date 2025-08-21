@@ -31,7 +31,8 @@ export interface Student {
 export interface Classroom {
   id: string; // MaLop
   name: string; // TenLop
-  teacherId: string; // MaGiaoVien from PhanCongGiangDay
+  teacherId: string; // MaGiaoVien (homeroom teacher)
+  teacherRole?: string; // Frontend-specific: Describes the current user's role in this class
 }
 
 // Maps to TinNhan table
@@ -104,4 +105,38 @@ export interface SupportRequest {
   requesterType: 'PHUHUYNH' | 'GIAOVIEN'; // LoaiNguoiYeuCau
   createdAt: Date; // NgayTao
   requesterInfo?: User; // Joined user info
+}
+
+// Maps to ThoiKhoaBieu table
+export interface TimetableEntry {
+  dayOfWeek: number; // 2 for Monday, 3 for Tuesday, etc.
+  period: number; // 1, 2, 3...
+  subjectName: string;
+}
+
+export interface Timetable {
+  studentId: string; // For parents to distinguish between children
+  studentName: string;
+  classId: string;
+  className: string;
+  entries: TimetableEntry[];
+}
+
+// Payload for creating a new student
+export interface NewStudentPayload {
+  classId: string;
+  studentName: string;
+  studentDateOfBirth: string;
+  studentGender: string;
+  parentName: string;
+  parentEmail: string;
+  parentPhone: string;
+}
+
+// Payload for updating an existing student
+export interface UpdateStudentPayload {
+  id: string;
+  name: string;
+  dateOfBirth: string;
+  gender: string;
 }

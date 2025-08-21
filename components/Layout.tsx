@@ -1,9 +1,10 @@
 
+
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types';
-import { HomeIcon, UsersIcon, MessageIcon, AnnouncementIcon, ReportIcon, BillingIcon, ProfileIcon, LogoutIcon, SupportIcon, UserManagementIcon, ShieldCheckIcon } from './icons';
+import { HomeIcon, UsersIcon, MessageIcon, AnnouncementIcon, ReportIcon, BillingIcon, ProfileIcon, LogoutIcon, SupportIcon, UserManagementIcon, ShieldCheckIcon, TimetableIcon } from './icons';
 
 const Sidebar: React.FC<{ isOpen: boolean, setIsOpen: (isOpen: boolean) => void }> = ({ isOpen, setIsOpen }) => {
   const { user, logout } = useAuth();
@@ -51,6 +52,9 @@ const Sidebar: React.FC<{ isOpen: boolean, setIsOpen: (isOpen: boolean) => void 
         </NavLink>
         <NavLink to="/announcements" className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
           <AnnouncementIcon className="w-6 h-6 mr-3" /> Thông báo
+        </NavLink>
+         <NavLink to="/timetable" className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
+          <TimetableIcon className="w-6 h-6 mr-3" /> Thời khóa biểu
         </NavLink>
         {user?.role === UserRole.TEACHER && teacherLinks.map(link => (
           <NavLink key={link.to} to={link.to} className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>

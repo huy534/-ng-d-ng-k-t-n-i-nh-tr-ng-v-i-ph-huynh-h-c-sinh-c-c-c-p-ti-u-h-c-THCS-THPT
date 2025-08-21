@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../services/mockApi';
 import { useAuth } from '../contexts/AuthContext';
-import { Classroom, Student } from '../types';
-import { PencilIcon } from '../components/icons';
+import { Classroom, Student, UpdateStudentPayload } from '../types';
+import { PencilIcon, TrashIcon, ReportIcon } from '../components/icons';
+import AddStudentModal from './AddStudentModal';
+import EditStudentModal from './EditStudentModal';
 
 const ClassesPage: React.FC = () => {
   const { user } = useAuth();
@@ -11,6 +13,8 @@ const ClassesPage: React.FC = () => {
   const [selectedClass, setSelectedClass] = useState<Classroom | null>(null);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [studentToEdit, setStudentToEdit] = useState<Student | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -29,6 +33,32 @@ const ClassesPage: React.FC = () => {
     setSelectedClass(classroom);
     api.getStudentsByClass(classroom.id).then(setStudents);
   };
+
+  const handleAddStudentSuccess = (newStudent: Student) => {
+    setStudents(prev => [...prev, newStudent]);
+    setShowAddStudentModal(false);
+  };
+
+  const handleEditStudentSuccess = (updatedStudent: Student) => {
+    setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
+    setStudentToEdit(null);
+  };
+  
+  const handleDeleteStudent = async (studentId: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa học sinh này? Hành động này không thể hoàn tác.')) {
+      try {
+        await api.deleteStudent(studentId);
+        setStudents(prev => prev.filter(s => s.id !== studentId));
+      } catch (error) {
+        console.error("Failed to delete student", error);
+        alert('Xóa học sinh thất bại.');
+      }
+    }
+  };
+
+  // Check if the current user is the homeroom teacher of the selected class
+  const isHomeroomTeacher = selectedClass ? user?.id === selectedClass.teacherId : false;
+
 
   if (loading) return <p>Đang tải danh sách lớp...</p>;
 
@@ -55,8 +85,19 @@ const ClassesPage: React.FC = () => {
           {selectedClass ? (
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex justify-between items-center mb-4">
-                 <h3 className="text-2xl font-bold text-gray-800">{selectedClass.name}</h3>
-                <button className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm">Thêm học sinh</button>
+                 <div className="flex-grow">
+                    <h3 className="text-2xl font-bold text-gray-800">{selectedClass.name}</h3>
+                    {selectedClass.teacherRole && (
+                        <p className="text-sm text-gray-500 mt-1">
+                            <span className="font-semibold">Vai trò của bạn:</span> {selectedClass.teacherRole}
+                        </p>
+                    )}
+                 </div>
+                {isHomeroomTeacher && (
+                  <button onClick={() => setShowAddStudentModal(true)} className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm flex-shrink-0">
+                    Thêm học sinh
+                  </button>
+                )}
               </div>
               
               <div className="overflow-x-auto">
@@ -76,12 +117,24 @@ const ClassesPage: React.FC = () => {
                                   </td>
                                   <td className="p-3 text-gray-800">{student.name}</td>
                                   <td className="p-3">
-                                      <Link to={`/class/${selectedClass.id}/student/${student.id}/report`}
-                                        className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold hover:bg-blue-200"
-                                      >
-                                          <PencilIcon className="w-4 h-4 mr-1" />
-                                          Cập nhật học bạ
-                                      </Link>
+                                      <div className="flex items-center space-x-3">
+                                        <Link to={`/class/${selectedClass.id}/student/${student.id}/report`}
+                                            className="text-blue-600 hover:text-blue-800"
+                                            title="Cập nhật học bạ"
+                                        >
+                                            <ReportIcon className="w-5 h-5" />
+                                        </Link>
+                                        {isHomeroomTeacher && (
+                                          <>
+                                            <button onClick={() => setStudentToEdit(student)} className="text-yellow-600 hover:text-yellow-800" title="Sửa thông tin">
+                                                <PencilIcon className="w-5 h-5" />
+                                            </button>
+                                            <button onClick={() => handleDeleteStudent(student.id)} className="text-red-600 hover:text-red-800" title="Xóa học sinh">
+                                                <TrashIcon className="w-5 h-5" />
+                                            </button>
+                                          </>
+                                        )}
+                                      </div>
                                   </td>
                               </tr>
                           ))}
@@ -96,6 +149,20 @@ const ClassesPage: React.FC = () => {
           )}
         </div>
       </div>
+      {showAddStudentModal && selectedClass && (
+        <AddStudentModal
+            classId={selectedClass.id}
+            onClose={() => setShowAddStudentModal(false)}
+            onSuccess={handleAddStudentSuccess}
+        />
+      )}
+      {studentToEdit && (
+          <EditStudentModal
+              student={studentToEdit}
+              onClose={() => setStudentToEdit(null)}
+              onSuccess={handleEditStudentSuccess}
+          />
+      )}
     </div>
   );
 };
