@@ -326,13 +326,29 @@ export const api = {
     if (!currentUser) return Promise.resolve([]);
     if (currentUser.role === UserRole.PARENT) {
       const students = db.students.filter(s => s.parentId === currentUser!.id);
-      const teacherIds = students.map(s => db.classrooms.find(c => c.id === s.classId)?.teacherId);
-      const uniqueTeacherIds = [...new Set(teacherIds)];
+      const classIds = [...new Set(students.map(s => s.classId))];
+      const teacherIds = new Set<string>();
+
+      classIds.forEach(classId => {
+          // Add homeroom teacher
+          const classroom = db.classrooms.find(c => c.id === classId);
+          if (classroom?.teacherId) {
+              teacherIds.add(classroom.teacherId);
+          }
+          // Add all subject teachers for that class
+          db.phanCongGiangDay.forEach(assignment => {
+              if (assignment.classId === classId && assignment.teacherId) {
+                  teacherIds.add(assignment.teacherId);
+              }
+          });
+      });
+
+      const uniqueTeacherIds = Array.from(teacherIds);
       const teachers = db.users.filter(u => uniqueTeacherIds.includes(u.id));
       return Promise.resolve(teachers);
     }
     if (currentUser.role === UserRole.TEACHER) {
-      const classrooms = db.classrooms.filter(c => c.teacherId === currentUser!.id);
+      const classrooms = await api.getClassroomsByTeacher();
       const classIds = classrooms.map(c => c.id);
       const studentParentIds = db.students.filter(s => classIds.includes(s.classId)).map(s => s.parentId);
       const uniqueParentIds = [...new Set(studentParentIds)];

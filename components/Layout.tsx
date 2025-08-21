@@ -31,6 +31,7 @@ const Sidebar: React.FC<{ isOpen: boolean, setIsOpen: (isOpen: boolean) => void 
     { to: "/admin/dashboard", icon: ShieldCheckIcon, text: "Tổng quan" },
     { to: "/admin/users", icon: UserManagementIcon, text: "Quản lý User" },
     { to: "/admin/support", icon: SupportIcon, text: "Quản lý Hỗ trợ" },
+    { to: "/announcements", icon: AnnouncementIcon, text: "Thông báo" },
   ];
 
   const renderNavLinks = () => {
