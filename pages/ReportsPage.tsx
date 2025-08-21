@@ -54,35 +54,46 @@ const ReportsPage: React.FC = () => {
             
             {loading ? <p>Đang tải báo cáo...</p> : (
                 reports.length > 0 ? (
-                    <div className="space-y-6">
+                    <div className="space-y-8">
                         {reports.map(report => (
-                            <div key={report.id} className="bg-white rounded-lg shadow-md p-6">
-                                <div className="flex justify-between items-center border-b pb-4 mb-4">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-primary-800">{report.term} - Năm học {report.year}</h3>
-                                        <p className="text-gray-600">Học sinh: {selectedStudent?.name}</p>
+                            <div key={report.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                                <div className="p-6 bg-gray-50 border-b">
+                                    <h3 className="text-xl font-bold text-primary-800">{report.term} - Năm học {report.year}</h3>
+                                    <p className="text-gray-600">Học sinh: {selectedStudent?.name}</p>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-gray-100">
+                                            <tr>
+                                                <th className="p-4 font-semibold text-sm text-gray-700 uppercase">Môn học</th>
+                                                <th className="p-4 font-semibold text-sm text-gray-700 uppercase">Điểm TB</th>
+                                                <th className="p-4 font-semibold text-sm text-gray-700 uppercase">Số buổi nghỉ</th>
+                                                <th className="p-4 font-semibold text-sm text-gray-700 uppercase">Hạnh kiểm</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {report.records.map(record => (
+                                                <tr key={record.subjectName} className="border-b border-gray-100 hover:bg-gray-50">
+                                                    <td className="p-4 text-gray-800 font-medium">{record.subjectName}</td>
+                                                    <td className="p-4 text-gray-800">{record.averageScore.toFixed(2)}</td>
+                                                    <td className="p-4 text-gray-800">{record.absences}</td>
+                                                    <td className="p-4 text-gray-800">{record.conduct}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {report.teacherComments && (
+                                    <div className="p-6 border-t">
+                                        <h4 className="font-semibold text-gray-700 mb-2">Nhận xét của giáo viên:</h4>
+                                        <p className="text-gray-700 italic bg-gray-50 p-3 rounded-md">{report.teacherComments}</p>
                                     </div>
-                                    <a href={report.fileUrl} download className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
-                                        Tải PDF
-                                    </a>
-                                </div>
-                                <div className="mb-4">
-                                    <h4 className="font-semibold text-gray-700 mb-2">Kết quả học tập:</h4>
-                                    <ul className="list-disc list-inside space-y-1">
-                                        {report.grades.map(grade => (
-                                            <li key={grade.subject}>{grade.subject}: <span className="font-bold">{grade.score} điểm</span></li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 className="font-semibold text-gray-700 mb-2">Nhận xét của giáo viên:</h4>
-                                    <p className="text-gray-700 italic bg-gray-50 p-3 rounded-md">{report.comments}</p>
-                                </div>
+                                )}
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <p className="text-center text-gray-500 bg-white p-6 rounded-lg shadow-md">Không có báo cáo nào cho học sinh này.</p>
+                    <p className="text-center text-gray-500 bg-white p-8 rounded-lg shadow-md">Không có báo cáo nào cho học sinh này.</p>
                 )
             )}
         </div>

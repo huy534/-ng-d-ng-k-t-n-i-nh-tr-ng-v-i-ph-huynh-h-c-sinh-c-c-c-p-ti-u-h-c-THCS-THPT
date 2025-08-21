@@ -79,8 +79,8 @@ const BillingPage: React.FC = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {invoice.items.map(item => (
-                                                <tr key={item.id} className="border-b border-gray-100">
+                                            {invoice.items.map((item, index) => (
+                                                <tr key={index} className="border-b border-gray-100">
                                                     <td className="py-2 text-gray-700">{item.description}</td>
                                                     <td className="py-2 text-right text-gray-800">{formatCurrency(item.amount)}</td>
                                                 </tr>

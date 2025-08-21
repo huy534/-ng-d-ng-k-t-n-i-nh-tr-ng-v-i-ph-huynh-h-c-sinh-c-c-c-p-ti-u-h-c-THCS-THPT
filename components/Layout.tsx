@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types';
-import { HomeIcon, UsersIcon, MessageIcon, AnnouncementIcon, ReportIcon, BillingIcon, ProfileIcon, LogoutIcon } from './icons';
+import { HomeIcon, UsersIcon, MessageIcon, AnnouncementIcon, ReportIcon, BillingIcon, ProfileIcon, LogoutIcon, SupportIcon, UserManagementIcon, ShieldCheckIcon } from './icons';
 
 const Sidebar: React.FC<{ isOpen: boolean, setIsOpen: (isOpen: boolean) => void }> = ({ isOpen, setIsOpen }) => {
   const { user, logout } = useAuth();
@@ -26,6 +26,46 @@ const Sidebar: React.FC<{ isOpen: boolean, setIsOpen: (isOpen: boolean) => void 
     { to: "/billing", icon: BillingIcon, text: "Học phí" },
   ];
 
+  const adminLinks = [
+    { to: "/admin/dashboard", icon: ShieldCheckIcon, text: "Tổng quan" },
+    { to: "/admin/users", icon: UserManagementIcon, text: "Quản lý User" },
+    { to: "/admin/support", icon: SupportIcon, text: "Quản lý Hỗ trợ" },
+  ];
+
+  const renderNavLinks = () => {
+    if (user?.role === UserRole.ADMIN) {
+      return adminLinks.map(link => (
+        <NavLink key={link.to} to={link.to} className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
+          <link.icon className="w-6 h-6 mr-3" /> {link.text}
+        </NavLink>
+      ));
+    }
+
+    return (
+      <>
+        <NavLink to="/" className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`} end>
+          <HomeIcon className="w-6 h-6 mr-3" /> Bảng điều khiển
+        </NavLink>
+        <NavLink to="/messages" className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
+          <MessageIcon className="w-6 h-6 mr-3" /> Tin nhắn
+        </NavLink>
+        <NavLink to="/announcements" className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
+          <AnnouncementIcon className="w-6 h-6 mr-3" /> Thông báo
+        </NavLink>
+        {user?.role === UserRole.TEACHER && teacherLinks.map(link => (
+          <NavLink key={link.to} to={link.to} className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
+            <link.icon className="w-6 h-6 mr-3" /> {link.text}
+          </NavLink>
+        ))}
+        {user?.role === UserRole.PARENT && parentLinks.map(link => (
+          <NavLink key={link.to} to={link.to} className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
+            <link.icon className="w-6 h-6 mr-3" /> {link.text}
+          </NavLink>
+        ))}
+      </>
+    );
+  };
+  
   return (
     <>
       <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-primary-900 text-white transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0`}>
@@ -33,27 +73,14 @@ const Sidebar: React.FC<{ isOpen: boolean, setIsOpen: (isOpen: boolean) => void 
           <h1 className="text-2xl font-bold">EdConnect</h1>
         </div>
         <nav className="p-4 space-y-2">
-          <NavLink to="/" className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`} end>
-            <HomeIcon className="w-6 h-6 mr-3" /> Bảng điều khiển
-          </NavLink>
-          <NavLink to="/messages" className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
-            <MessageIcon className="w-6 h-6 mr-3" /> Tin nhắn
-          </NavLink>
-          <NavLink to="/announcements" className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
-            <AnnouncementIcon className="w-6 h-6 mr-3" /> Thông báo
-          </NavLink>
-          {user?.role === UserRole.TEACHER && teacherLinks.map(link => (
-            <NavLink key={link.to} to={link.to} className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
-              <link.icon className="w-6 h-6 mr-3" /> {link.text}
-            </NavLink>
-          ))}
-          {user?.role === UserRole.PARENT && parentLinks.map(link => (
-            <NavLink key={link.to} to={link.to} className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
-              <link.icon className="w-6 h-6 mr-3" /> {link.text}
-            </NavLink>
-          ))}
+          {renderNavLinks()}
         </nav>
         <div className="absolute bottom-0 w-full p-4 border-t border-primary-800">
+            { user?.role !== UserRole.ADMIN &&
+              <NavLink to="/support" className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
+                  <SupportIcon className="w-6 h-6 mr-3" /> Hỗ trợ
+              </NavLink>
+            }
             <NavLink to="/profile" className={({ isActive }) => `${navLinkClass} ${isActive ? activeLinkClass : ''}`}>
                 <ProfileIcon className="w-6 h-6 mr-3" /> Hồ sơ
             </NavLink>

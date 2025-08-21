@@ -4,8 +4,8 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('parent@example.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -26,20 +26,6 @@ const LoginPage: React.FC = () => {
 
   if (isAuthenticated) {
     return <Navigate to="/" />;
-  }
-
-  const handleQuickLogin = async (userEmail: string) => {
-    setEmail(userEmail);
-    setPassword('password'); // mock password
-    setError('');
-    setIsSubmitting(true);
-    const success = await login(userEmail, 'password');
-    if (success) {
-      navigate('/');
-    } else {
-      setError('Đăng nhập nhanh thất bại.');
-      setIsSubmitting(false);
-    }
   }
 
   return (
@@ -109,13 +95,6 @@ const LoginPage: React.FC = () => {
             </button>
           </div>
         </form>
-         <div className="mt-4 text-center text-sm text-gray-600">
-          <p className="mb-2">Hoặc đăng nhập nhanh với tài khoản:</p>
-          <div className="flex justify-center space-x-2">
-            <button onClick={() => handleQuickLogin('parent@example.com')} className="px-4 py-2 text-xs font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600">Phụ Huynh</button>
-            <button onClick={() => handleQuickLogin('teacher@example.com')} className="px-4 py-2 text-xs font-medium text-white bg-green-500 rounded-md hover:bg-green-600">Giáo Viên</button>
-          </div>
-        </div>
       </div>
     </div>
   );

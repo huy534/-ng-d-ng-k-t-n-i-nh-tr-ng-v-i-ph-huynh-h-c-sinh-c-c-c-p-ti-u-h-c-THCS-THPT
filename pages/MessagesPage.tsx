@@ -17,7 +17,7 @@ const MessagesPage: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      api.getContacts(user).then(data => {
+      api.getContacts().then(data => {
         setContacts(data);
         setLoadingContacts(false);
         if (data.length > 0) {
@@ -36,7 +36,8 @@ const MessagesPage: React.FC = () => {
     setSelectedContact(contact);
     setLoadingMessages(true);
     if (user) {
-      api.getMessages(user.id, contact.id).then(data => {
+      // API now infers current user from token
+      api.getMessages(contact.id).then(data => {
         setMessages(data);
         setLoadingMessages(false);
       });
@@ -46,8 +47,9 @@ const MessagesPage: React.FC = () => {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() === '' || !selectedContact || !user) return;
-
-    const sentMessage = await api.sendMessage(user.id, selectedContact.id, newMessage);
+    
+    // API now infers senderId from token
+    const sentMessage = await api.sendMessage(selectedContact.id, newMessage);
     setMessages(prev => [...prev, sentMessage]);
     setNewMessage('');
   };

@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { User, UserRole } from '../types';
 import { api } from '../services/mockApi';
@@ -18,9 +17,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Try to load user from session storage to persist login
+    // Try to load user and token from session storage to persist login
     const storedUser = sessionStorage.getItem('user');
-    if (storedUser) {
+    const token = sessionStorage.getItem('authToken');
+    if (storedUser && token) {
       setUser(JSON.parse(storedUser));
     }
     setIsLoading(false);
@@ -29,10 +29,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, pass: string) => {
     setIsLoading(true);
     try {
-      const loggedInUser = await api.login(email, pass);
-      if (loggedInUser) {
-        setUser(loggedInUser);
-        sessionStorage.setItem('user', JSON.stringify(loggedInUser));
+      const response = await api.login(email, pass);
+      if (response && response.user && response.token) {
+        setUser(response.user);
+        sessionStorage.setItem('user', JSON.stringify(response.user));
+        sessionStorage.setItem('authToken', response.token); // Store the auth token
         return true;
       }
       return false;
@@ -47,6 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const logout = () => {
     setUser(null);
     sessionStorage.removeItem('user');
+    sessionStorage.removeItem('authToken'); // Remove the auth token
   };
 
   return (

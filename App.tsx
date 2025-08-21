@@ -12,8 +12,13 @@ import ClassesPage from './pages/ClassesPage';
 import ReportsPage from './pages/ReportsPage';
 import BillingPage from './pages/BillingPage';
 import ProfilePage from './pages/ProfilePage';
+import SupportPage from './pages/SupportPage';
 import { UserRole } from './types';
 
+// Admin Pages
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import UserManagementPage from './pages/admin/UserManagementPage';
+import SupportManagementPage from './pages/admin/SupportManagementPage';
 
 const ProtectedRoute: React.FC<{ roles?: UserRole[] }> = ({ roles }) => {
     const { isAuthenticated, user, isLoading } = useAuth();
@@ -30,8 +35,11 @@ const ProtectedRoute: React.FC<{ roles?: UserRole[] }> = ({ roles }) => {
         return <Navigate to="/login" replace />;
     }
     
+    // If a user with a specific role tries to access a page not for them, redirect.
+    // Admins are redirected to their dashboard, others to the general one.
+    const homePath = user?.role === UserRole.ADMIN ? '/admin/dashboard' : '/';
     if (roles && user && !roles.includes(user.role)) {
-        return <Navigate to="/" replace />; // Or a dedicated "Access Denied" page
+        return <Navigate to={homePath} replace />; 
     }
 
     return (
@@ -48,20 +56,37 @@ const AppRoutes: React.FC = () => {
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 
-                <Route element={<ProtectedRoute />}>
+                {/* Routes for Parents and Teachers */}
+                <Route element={<ProtectedRoute roles={[UserRole.PARENT, UserRole.TEACHER]} />}>
                     <Route path="/" element={<DashboardPage />} />
                     <Route path="/messages" element={<MessagesPage />} />
                     <Route path="/announcements" element={<AnnouncementsPage />} />
-                    <Route path="/profile" element={<ProfilePage />} />
+                    <Route path="/support" element={<SupportPage />} />
                 </Route>
                 
+                {/* Profile is accessible to all logged-in users */}
+                <Route element={<ProtectedRoute />}>
+                    <Route path="/profile" element={<ProfilePage />} />
+                </Route>
+
+                {/* Teacher-specific routes */}
                 <Route element={<ProtectedRoute roles={[UserRole.TEACHER]} />}>
                     <Route path="/classes" element={<ClassesPage />} />
                 </Route>
 
+                {/* Parent-specific routes */}
                 <Route element={<ProtectedRoute roles={[UserRole.PARENT]} />}>
                     <Route path="/reports" element={<ReportsPage />} />
                     <Route path="/billing" element={<BillingPage />} />
+                </Route>
+
+                {/* Admin-specific routes */}
+                <Route element={<ProtectedRoute roles={[UserRole.ADMIN]} />}>
+                    <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+                    <Route path="/admin/users" element={<UserManagementPage />} />
+                    <Route path="/admin/support" element={<SupportManagementPage />} />
+                     {/* Admins also need access to announcements to create them */}
+                    <Route path="/announcements" element={<AnnouncementsPage />} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/" />} />
